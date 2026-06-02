@@ -9,6 +9,7 @@ from restapi.views import (
     DeleteSampleAPIView,
     ActiveSamplesAPIView,
     DeletedSamplesAPIView,
+    ShipmentReceivedCreateAPIView,
 )
 
 urlpatterns = [
@@ -67,6 +68,13 @@ urlpatterns = [
         "deleted-samples/",
         DeletedSamplesAPIView.as_view(),
         name="deleted-samples"
+    ),
+
+    # CREATE SHIPMENT RECEIVED API
+    path(
+        "create-shipment-received/",
+        ShipmentReceivedCreateAPIView.as_view(),
+        name="create-shipment-received"
     ),
 
 ]

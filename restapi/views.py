@@ -9,9 +9,11 @@ from rest_framework.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from django.utils.timezone import now
+from django.forms.models import model_to_dict
 
 from restapi.models import ReceiveSample
 from restapi.serializers.receive_serializer import ReceiveSampleSerializer
+from restapi.models.shipment_received import ShipmentReceived
 
 
 logger = logging.getLogger(__name__)
@@ -107,6 +109,8 @@ class ReceiveSampleAPIView(APIView):
             sample.accepted_by = request.data.get("accepted_by")
             sample.remark = request.data.get("remark")
             sample.sub_optimal = request.data.get("sub_optimal", False)
+
+            sample.shipment_received_id = request.data.get("shipment_received")
 
             sample.status = "Received"
 
@@ -285,6 +289,39 @@ class DeletedSamplesAPIView(APIView):
 
         except Exception:
             logger.error(traceback.format_exc())
+            return Response(
+                {"error": "Internal Server Error"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+# =====================================================
+# CREATE SHIPMENT RECEIVED API
+# =====================================================
+
+class ShipmentReceivedCreateAPIView(APIView):
+
+    def post(self, request):
+        try:
+
+            shipment = ShipmentReceived.objects.create(
+                receive_date=request.data.get("receive_date"),
+                received_no=request.data.get("received_no"),
+                status=request.data.get("status"),
+                result=request.data.get("result")
+            )
+
+            return Response(
+                {
+                    "message": "Shipment received created successfully",
+                    "data": model_to_dict(shipment)
+                },
+                status=status.HTTP_201_CREATED
+            )
+
+        except Exception:
+            logger.error(traceback.format_exc())
+
             return Response(
                 {"error": "Internal Server Error"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
